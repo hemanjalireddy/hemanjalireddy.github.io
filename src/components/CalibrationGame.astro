@@ -1,0 +1,335 @@
+---
+// Five true/false statements; visitors give an answer plus a confidence, then see their own calibration.
+const questions = [
+  { q: 'The Transformer paper, “Attention Is All You Need”, was published in 2017.', a: true },
+  { q: 'Ayrton Senna won more Formula 1 World Championships than Michael Schumacher.', a: false },
+  { q: 'A honeybee has five eyes.', a: true },
+  { q: 'Sunflowers keep turning to follow the sun for their entire lives.', a: false },
+  { q: 'Spirited Away won the Academy Award for Best Animated Feature.', a: true },
+];
+const explain = [
+  'True. Vaswani et al., NeurIPS 2017.',
+  'False. Senna won 3 titles; Schumacher won 7.',
+  'True. Two large compound eyes plus three small ocelli on top of the head.',
+  'False. Young sunflowers track the sun, but mature flower heads settle facing east.',
+  'True. It won at the 2003 Oscars.',
+];
+---
+
+<section id="calibration" class="chapter">
+  <div class="chapter-head">
+    <span class="chapter-num">Chapter IV</span>
+    <h2>How sure are you?</h2>
+    <span class="chapter-note">a small calibration experiment</span>
+  </div>
+  <p class="lede">
+    I spend a lot of time asking whether a model's confidence can be trusted. Here's the same test, for you. Answer
+    five statements and say how sure you are. You'll get your own reliability chart and Brier score, the same metrics I
+    used in my <a href="/specimens/llm-calibration/">LLM calibration capstone</a>.
+  </p>
+
+  <div class="game card">
+    <form class="quiz" novalidate>
+      <ol>
+        {
+          questions.map((item, i) => (
+            <li class="q" data-answer={String(item.a)} data-explain={explain[i]}>
+              <fieldset>
+                <legend>{item.q}</legend>
+                <div class="choices">
+                  <label>
+                    <input type="radio" name={`q${i}`} value="true" /> True
+                  </label>
+                  <label>
+                    <input type="radio" name={`q${i}`} value="false" /> False
+                  </label>
+                </div>
+                <label class="conf">
+                  <span class="mono">
+                    confidence <output>75</output>%
+                  </span>
+                  <input type="range" name={`c${i}`} min="50" max="100" step="5" value="75" />
+                </label>
+                <p class="verdict mono" aria-live="polite" />
+              </fieldset>
+            </li>
+          ))
+        }
+      </ol>
+      <div class="form-foot">
+        <button class="btn btn-primary" type="submit">Score my calibration</button>
+        <button class="btn" type="reset">Start over</button>
+        <p class="form-msg mono" role="alert"></p>
+      </div>
+    </form>
+
+    <div class="results" hidden>
+      <div class="chart-wrap">
+        <svg class="reliability" viewBox="0 0 320 320" role="img" aria-label="Your reliability chart"></svg>
+      </div>
+      <div class="readout">
+        <p class="big"><span class="brier mono"></span><span class="unit">Brier score</span></p>
+        <p class="summary-line"></p>
+        <p class="explain-small">
+          The Brier score is the mean squared gap between your confidence and what happened (0 is perfect; always
+          saying 50% scores 0.25). Points on the dashed diagonal are perfectly calibrated; below it means
+          over-confident.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .game {
+    padding: clamp(18px, 3vw, 32px);
+  }
+  ol {
+    list-style: none;
+    counter-reset: q;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 14px;
+  }
+  .q {
+    counter-increment: q;
+  }
+  fieldset {
+    border: 1px dashed var(--rule);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin: 0;
+  }
+  legend {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    padding: 0 6px;
+  }
+  legend::before {
+    content: counter(q) '. ';
+    color: var(--sage);
+  }
+  .choices {
+    display: flex;
+    gap: 22px;
+    margin: 6px 0 8px;
+  }
+  .choices label {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    cursor: pointer;
+  }
+  input[type='radio'] {
+    accent-color: var(--sage);
+    width: 18px;
+    height: 18px;
+  }
+  .conf {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 12px;
+    align-items: center;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+  }
+  input[type='range'] {
+    accent-color: var(--rose);
+    width: 100%;
+  }
+  .verdict {
+    margin: 6px 0 0;
+    font-size: 0.82rem;
+    min-height: 0;
+  }
+  .verdict.right {
+    color: var(--sage);
+  }
+  .verdict.wrong {
+    color: var(--rose);
+  }
+  .form-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 20px;
+  }
+  .form-msg {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--rose);
+  }
+  .results {
+    display: grid;
+    grid-template-columns: minmax(220px, 340px) 1fr;
+    gap: 28px;
+    align-items: center;
+    margin-top: 28px;
+    padding-top: 24px;
+    border-top: 1px dashed var(--rule);
+  }
+  .results[hidden] {
+    display: none;
+  }
+  .reliability {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .big {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 6px;
+  }
+  .brier {
+    font-size: 2.8rem;
+    color: var(--sage);
+    font-weight: 500;
+  }
+  .unit {
+    font-family: var(--font-hand);
+    font-size: 1.4rem;
+    color: var(--ink-soft);
+  }
+  .summary-line {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+  }
+  .explain-small {
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+  }
+  @media (max-width: 680px) {
+    .conf {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+    .results {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  import rough from 'roughjs';
+
+  const form = document.querySelector<HTMLFormElement>('.quiz')!;
+  const results = document.querySelector<HTMLDivElement>('.results')!;
+  const svg = document.querySelector<SVGSVGElement>('.reliability')!;
+  const msg = form.querySelector<HTMLParagraphElement>('.form-msg')!;
+  const items = [...form.querySelectorAll<HTMLLIElement>('.q')];
+  const NS = 'http://www.w3.org/2000/svg';
+  const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  type Row = { conf: number; correct: boolean };
+  let last: Row[] | null = null;
+
+  form.querySelectorAll<HTMLInputElement>('input[type=range]').forEach((r) => {
+    const out = r.closest('.conf')!.querySelector('output')!;
+    r.addEventListener('input', () => (out.textContent = r.value));
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const rows: Row[] = [];
+    for (const [i, li] of items.entries()) {
+      const pick = form.querySelector<HTMLInputElement>(`input[name=q${i}]:checked`);
+      if (!pick) {
+        msg.textContent = `Question ${i + 1} still needs an answer.`;
+        li.querySelector('input')!.focus();
+        return;
+      }
+      const conf = Number(form.querySelector<HTMLInputElement>(`input[name=c${i}]`)!.value) / 100;
+      const correct = pick.value === li.dataset.answer;
+      rows.push({ conf, correct });
+      const v = li.querySelector<HTMLParagraphElement>('.verdict')!;
+      v.textContent = `${correct ? '✓' : '✗'} ${li.dataset.explain}`;
+      v.className = `verdict mono ${correct ? 'right' : 'wrong'}`;
+    }
+    msg.textContent = '';
+    last = rows;
+    render(rows);
+    results.hidden = false;
+    results.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' });
+  });
+
+  form.addEventListener('reset', () => {
+    results.hidden = true;
+    last = null;
+    msg.textContent = '';
+    items.forEach((li) => {
+      const v = li.querySelector<HTMLParagraphElement>('.verdict')!;
+      v.textContent = '';
+      v.className = 'verdict mono';
+      li.querySelector('output')!.textContent = '75';
+    });
+  });
+
+  function render(rows: Row[]) {
+    // Brier score on the probability assigned to the chosen answer being right.
+    const brier = rows.reduce((s, r) => s + (r.conf - (r.correct ? 1 : 0)) ** 2, 0) / rows.length;
+    const acc = rows.filter((r) => r.correct).length / rows.length;
+    const avgConf = rows.reduce((s, r) => s + r.conf, 0) / rows.length;
+    document.querySelector('.brier')!.textContent = brier.toFixed(3);
+    const gap = avgConf - acc;
+    const line =
+      Math.abs(gap) <= 0.08
+        ? `Nicely calibrated: ${Math.round(avgConf * 100)}% average confidence, ${Math.round(acc * 100)}% correct.`
+        : gap > 0
+          ? `A little over-confident: ${Math.round(avgConf * 100)}% average confidence, but ${Math.round(acc * 100)}% correct. (LLMs do this too.)`
+          : `Under-confident: you were right ${Math.round(acc * 100)}% of the time but only ${Math.round(avgConf * 100)}% sure. Trust yourself more!`;
+    document.querySelector('.summary-line')!.textContent = line;
+
+    const ink = css('--ink-soft');
+    const rule = css('--rule');
+    const sage = css('--sage');
+    const rose = css('--rose');
+    svg.replaceChildren();
+    const rc = rough.svg(svg);
+    const L = 40, R = 300, T = 16, B = 280;
+    const x = (c: number) => L + ((c - 0.5) / 0.5) * (R - L);
+    const y = (v: number) => B - v * (B - T);
+    svg.appendChild(rc.rectangle(L, T, R - L, B - T, { stroke: rule, roughness: 1, seed: 2 }));
+    // Perfect calibration diagonal, for confidences 50–100%
+    svg.appendChild(rc.line(x(0.5), y(0.5), x(1), y(1), { stroke: ink, strokeLineDash: [6, 6], roughness: 1, seed: 4 }));
+
+    const label = (tx: number, ty: number, s: string, anchor = 'middle', rot = 0) => {
+      const t = document.createElementNS(NS, 'text');
+      t.setAttribute('x', String(tx));
+      t.setAttribute('y', String(ty));
+      t.setAttribute('text-anchor', anchor);
+      t.setAttribute('fill', ink);
+      t.setAttribute('font-family', css('--font-mono'));
+      t.setAttribute('font-size', '10');
+      if (rot) t.setAttribute('transform', `rotate(${rot} ${tx} ${ty})`);
+      t.textContent = s;
+      svg.appendChild(t);
+    };
+    [0.5, 0.75, 1].forEach((c) => label(x(c), B + 16, `${Math.round(c * 100)}%`));
+    [0, 0.5, 1].forEach((v) => label(L - 8, y(v) + 3, `${Math.round(v * 100)}%`, 'end'));
+    label((L + R) / 2, B + 34, 'your confidence');
+    label(10, (T + B) / 2, 'right?', 'middle', -90);
+
+    // Each answer as a point (jittered so overlaps stay visible), plus the overall average.
+    rows.forEach((r, i) => {
+      const jitter = ((i % 3) - 1) * 6;
+      svg.appendChild(
+        rc.circle(x(r.conf), y(r.correct ? 1 : 0) + jitter, 12, {
+          fill: r.correct ? sage : rose,
+          fillStyle: 'solid',
+          stroke: r.correct ? sage : rose,
+          seed: i + 10,
+        }),
+      );
+    });
+    svg.appendChild(rc.circle(x(avgConf), y(acc), 22, { stroke: css('--ink'), strokeWidth: 1.6, seed: 30 }));
+    label(x(avgConf) + (avgConf > 0.85 ? -16 : 16), y(acc) - 14, 'you, overall', avgConf > 0.85 ? 'end' : 'start');
+  }
+
+  const redraw = () => last && render(last);
+  window.addEventListener('themechange', redraw);
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', redraw);
+</script>

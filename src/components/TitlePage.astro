@@ -1,0 +1,171 @@
+---
+import Sprig from './Sprig.astro';
+import { person } from '../data/site';
+---
+
+<header class="title-page page">
+  <div class="corner corner-tl"><Sprig kind="fern" size={56} /></div>
+  <div class="corner corner-br"><Sprig kind="branch" size={110} /></div>
+
+  <p class="volume mono">Field Journal · Vol. I · Observations of AI behavior</p>
+
+  <div class="name-row">
+    <h1>{person.name}</h1>
+    <span class="stamp" role="status">
+      <span class="stamp-dot" aria-hidden="true"></span>
+      {person.status}
+    </span>
+  </div>
+
+  <p class="headline">{person.headline}</p>
+
+  <ul class="offers mono" aria-label="What I offer">
+    {person.offers.map((o) => <li>{o}</li>)}
+  </ul>
+
+  <p class="intro">{person.intro}</p>
+
+  <div class="actions">
+    <a class="btn btn-primary" href={person.resume} target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0l-5-5m5 5l5-5M4 20h16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      Resume (PDF)
+    </a>
+    <a class="btn" href={`mailto:${person.email}`}>Email me</a>
+    <a class="btn" href={person.linkedin} target="_blank" rel="noopener">LinkedIn</a>
+    <a class="btn" href={person.github} target="_blank" rel="noopener">GitHub</a>
+  </div>
+
+  <p class="margin-note hand" aria-hidden="true">
+    ↓ specimens, measurements &amp; a small calibration game inside
+  </p>
+</header>
+
+<style>
+  .title-page {
+    position: relative;
+    min-height: min(92vh, 860px);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: 96px;
+    padding-bottom: 72px;
+  }
+  .corner {
+    position: absolute;
+    pointer-events: none;
+  }
+  .corner-tl {
+    top: 40px;
+    left: var(--gutter);
+    transform: rotate(-18deg);
+    opacity: 0.8;
+  }
+  .corner-br {
+    right: var(--gutter);
+    bottom: 36px;
+    opacity: 0.85;
+  }
+  .volume {
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 18px;
+    padding-left: 72px;
+  }
+  .name-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 14px 24px;
+  }
+  h1 {
+    font-size: clamp(2.8rem, 8.5vw, 6rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin: 0;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  }
+  .stamp {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--rose);
+    border: 2px solid var(--rose);
+    border-radius: 6px;
+    padding: 6px 12px;
+    transform: rotate(-4deg);
+    background: color-mix(in srgb, var(--rose-soft) 60%, transparent);
+  }
+  .stamp-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--rose);
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    50% {
+      opacity: 0.3;
+    }
+  }
+  .headline {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 3.6vw, 2.4rem);
+    line-height: 1.25;
+    max-width: 24ch;
+    margin: 22px 0 18px;
+    color: var(--ink);
+    font-style: italic;
+    font-weight: 400;
+  }
+  .offers {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 0;
+    padding: 0;
+    margin: 0 0 26px;
+    font-size: 0.85rem;
+    color: var(--sage);
+  }
+  .offers li:not(:last-child)::after {
+    content: '·';
+    margin: 0 10px;
+    color: var(--ink-faint);
+  }
+  .intro {
+    max-width: 62ch;
+    color: var(--ink-soft);
+    font-size: 1.08rem;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .margin-note {
+    font-size: 1.5rem;
+    color: var(--rose);
+    margin-top: 40px;
+    transform: rotate(-1.5deg);
+  }
+  @media (max-width: 640px) {
+    .volume {
+      padding-left: 0;
+      margin-top: 40px;
+    }
+    .corner-tl {
+      display: none;
+    }
+    .corner-br {
+      opacity: 0.35;
+    }
+  }
+</style>

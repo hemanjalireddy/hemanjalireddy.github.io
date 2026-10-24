@@ -1,0 +1,91 @@
+---
+import { measurements } from '../data/site';
+const tilts = [-1.5, 1, -0.5, 1.5, -1, 0.5];
+---
+
+<section id="measurements" class="chapter">
+  <div class="chapter-head">
+    <span class="chapter-num">Chapter I</span>
+    <h2>Field measurements</h2>
+    <span class="chapter-note">numbers I can stand behind</span>
+  </div>
+
+  <ul class="tags-grid">
+    {
+      measurements.map((m, i) => (
+        <li class="specimen-tag card" style={`--tilt:${tilts[i % tilts.length]}deg`}>
+          <span class="hole" aria-hidden="true" />
+          <span class="value">{m.value}</span>
+          <span class="label">{m.label}</span>
+          <span class="where mono">{m.where}</span>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .tags-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 22px;
+  }
+  .specimen-tag {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 22px 22px 18px 42px;
+    transform: rotate(var(--tilt));
+    transition: transform 0.2s ease;
+    border-radius: 4px 14px 14px 4px;
+  }
+  .specimen-tag:hover {
+    transform: rotate(0deg) translateY(-3px);
+  }
+  .hole {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 12px;
+    height: 12px;
+    margin-top: -6px;
+    border-radius: 50%;
+    border: 1.5px solid var(--rule);
+    background: var(--paper);
+  }
+  .hole::after {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 4px;
+    width: 24px;
+    height: 1.5px;
+    background: var(--gold);
+    transform: rotate(-20deg);
+    transform-origin: right;
+  }
+  .value {
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--sage);
+  }
+  .label {
+    color: var(--ink);
+    font-size: 0.98rem;
+    line-height: 1.45;
+  }
+  .where {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: auto;
+    padding-top: 6px;
+  }
+</style>

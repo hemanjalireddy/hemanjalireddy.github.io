@@ -1,0 +1,30 @@
+---
+import Base from '../layouts/Base.astro';
+import Sprig from '../components/Sprig.astro';
+---
+
+<Base title="Page not found | Hemanjali Reddy">
+  <main class="page lost">
+    <Sprig kind="branch" size={90} />
+    <h1>This specimen has wandered off.</h1>
+    <p>The page you were looking for isn't in the journal.</p>
+    <a class="btn btn-primary" href="/">Back to the first page</a>
+  </main>
+</Base>
+
+<style>
+  .lost {
+    min-height: 80vh;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    text-align: center;
+    gap: 8px;
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+  p {
+    color: var(--ink-soft);
+  }
+</style>

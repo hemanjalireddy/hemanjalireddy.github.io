@@ -1,0 +1,265 @@
+---
+import { specimens, greenhouse } from '../data/site';
+
+// Work experience and in-progress projects are plotted alongside the specimens.
+const points = [
+  ...specimens.map((s) => ({
+    label: s.mapLabel ?? s.title,
+    x: s.map.x,
+    y: s.map.y,
+    href: s.hasPage ? `/specimens/${s.slug}/` : s.repo,
+    group: 'project',
+  })),
+  { label: 'Pfizer evals', x: 0.95, y: 0.82, href: '#expeditions', group: 'work' },
+  { label: 'ResMed agent harness', x: 0.12, y: 0.95, href: '#expeditions', group: 'work' },
+  { label: 'ResMed regression evals', x: 0.6, y: 0.87, href: '#expeditions', group: 'work' },
+  { label: 'Constitutions × LLMs', x: 0.9, y: 0.66, href: '#expeditions', group: 'work' },
+  { label: 'Harmful-speech VLMs', x: 0.62, y: 0.55, href: '#expeditions', group: 'work' },
+  { label: 'Claims classifier', x: 0.35, y: 0.08, href: '#expeditions', group: 'work' },
+  { label: 'Spam-call detection', x: 0.6, y: 0.22, href: '#expeditions', group: 'work' },
+  { label: 'GPT from scratch', x: 0.08, y: 0.76, href: greenhouse[0].repo, group: 'sprout' },
+];
+---
+
+<figure class="map-figure card">
+  <figcaption>
+    <h3>Specimen map</h3>
+    <p>
+      Where everything I've worked on sits: from <em>building</em> to <em>evaluating</em>, and from classic ML &amp; vision to
+      LLMs &amp; agents. Placed by hand from what each project does. Hover or tap a point.
+    </p>
+    <ul class="legend mono">
+      <li><span class="dot project"></span> project</li>
+      <li><span class="dot work"></span> work</li>
+      <li><span class="dot sprout"></span> growing</li>
+    </ul>
+  </figcaption>
+  <div class="map-wrap">
+    <svg class="map" viewBox="0 0 600 450" role="img" aria-label="A 2D map of projects and work, from building to evaluating and from classic ML and vision to LLMs and agents."
+    ></svg>
+    <p class="map-tip mono" aria-live="polite"></p>
+    <ol class="map-key mono" hidden></ol>
+  </div>
+  <script type="application/json" id="map-data" set:html={JSON.stringify(points)} />
+</figure>
+
+<style>
+  .map-figure {
+    margin: 48px 0 0;
+    padding: 26px;
+    display: grid;
+    grid-template-columns: minmax(220px, 300px) 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  figcaption h3 {
+    font-size: 1.5rem;
+  }
+  figcaption p {
+    color: var(--ink-soft);
+    font-size: 0.98rem;
+  }
+  .legend {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.78rem;
+    display: grid;
+    gap: 6px;
+  }
+  .dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+  .dot.project {
+    background: var(--sage);
+  }
+  .dot.work {
+    background: var(--blue);
+  }
+  .dot.sprout {
+    background: var(--gold);
+  }
+  .map-wrap {
+    position: relative;
+    min-width: 0;
+  }
+  .map {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+  .map-tip {
+    min-height: 1.4em;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin: 8px 0 0;
+  }
+  :global(.map a text) {
+    font-family: var(--font-mono);
+    font-size: 11px;
+  }
+  :global(.map a:hover text),
+  :global(.map a:focus text) {
+    font-weight: 600;
+  }
+  :global(.map a:focus) {
+    outline: none;
+  }
+  @media (max-width: 760px) {
+    .map-figure {
+      grid-template-columns: 1fr;
+      padding: 18px;
+    }
+  }
+  .map-key {
+    columns: 2;
+    column-gap: 16px;
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    margin: 4px 0 0;
+    padding-left: 22px;
+  }
+  .map-key li {
+    break-inside: avoid;
+    margin-bottom: 4px;
+  }
+  .map-key a {
+    color: inherit;
+  }
+</style>
+
+<script>
+  import rough from 'roughjs';
+
+  type Point = { label: string; x: number; y: number; href?: string; group: string };
+  const svg = document.querySelector<SVGSVGElement>('.map')!;
+  const tip = document.querySelector<HTMLParagraphElement>('.map-tip')!;
+  const key = document.querySelector<HTMLOListElement>('.map-key')!;
+  const points: Point[] = JSON.parse(document.getElementById('map-data')!.textContent || '[]');
+  const NS = 'http://www.w3.org/2000/svg';
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  function draw(animate = false) {
+    // Use real pixel width so label text stays readable at any size.
+    const W = svg.clientWidth || 600;
+    // Narrow screens: numbered dots plus a key underneath, since inline labels would collide.
+    const compact = W < 560;
+    const H = compact ? W * 1.1 : W * 0.75;
+    key.hidden = !compact;
+    key.replaceChildren(
+      ...points.map((p) => {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        if (p.href) link.href = p.href;
+        if (p.href?.startsWith('http')) {
+          link.target = '_blank';
+          link.rel = 'noopener';
+        }
+        link.textContent = p.label;
+        li.appendChild(link);
+        return li;
+      }),
+    );
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.replaceChildren();
+    const rc = rough.svg(svg);
+    const ink = css('--ink-soft');
+    const faint = css('--rule');
+    const colors: Record<string, string> = { project: css('--sage'), work: css('--blue'), sprout: css('--gold') };
+    const pad = compact ? { l: 34, r: 12, t: 14, b: 36 } : { l: 40, r: 20, t: 20, b: 40 };
+    const px = (x: number) => pad.l + x * (W - pad.l - pad.r);
+    const py = (y: number) => H - pad.b - y * (H - pad.t - pad.b);
+    const opts = { roughness: 1.4, seed: 7 };
+
+    // Quadrant guides and axes
+    svg.appendChild(rc.line(px(0.5), py(0), px(0.5), py(1), { ...opts, stroke: faint, strokeLineDash: [4, 6] }));
+    svg.appendChild(rc.line(px(0), py(0.5), px(1), py(0.5), { ...opts, stroke: faint, strokeLineDash: [4, 6] }));
+    svg.appendChild(rc.line(px(0), py(0), px(1.02), py(0), { ...opts, stroke: ink }));
+    svg.appendChild(rc.line(px(0), py(0), px(0), py(1.03), { ...opts, stroke: ink }));
+
+    const text = (x: number, y: number, s: string, anchor = 'start', fill = ink, extra: Record<string, string> = {}) => {
+      const t = document.createElementNS(NS, 'text');
+      t.setAttribute('x', String(x));
+      t.setAttribute('y', String(y));
+      t.setAttribute('fill', fill);
+      t.setAttribute('text-anchor', anchor);
+      t.setAttribute('font-family', css('--font-hand'));
+      t.setAttribute('font-size', '18');
+      for (const [k, v] of Object.entries(extra)) t.setAttribute(k, v);
+      t.textContent = s;
+      return t;
+    };
+    svg.appendChild(text(px(0), H - 10, '← building', 'start'));
+    svg.appendChild(text(px(1), H - 10, 'evaluating →', 'end'));
+    svg.appendChild(text(14, py(0), 'classic ML & vision', 'start', ink, { transform: `rotate(-90 14 ${py(0)})` }));
+    svg.appendChild(text(14, py(1), 'LLMs & agents', 'end', ink, { transform: `rotate(-90 14 ${py(1)})` }));
+
+    points.forEach((p, i) => {
+      const a = document.createElementNS(NS, 'a');
+      if (p.href) a.setAttribute('href', p.href);
+      if (p.href?.startsWith('http')) {
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener');
+      }
+      a.setAttribute('aria-label', p.label);
+      const cx = px(p.x);
+      const cy = py(p.y);
+      const dot = rc.circle(cx, cy, compact ? 18 : 14, {
+        seed: i + 3,
+        fill: colors[p.group],
+        fillStyle: 'solid',
+        stroke: colors[p.group],
+        roughness: 1.2,
+      });
+      a.appendChild(dot);
+      if (compact) {
+        const num = text(cx, cy + 4, String(i + 1), 'middle', css('--paper'));
+        num.setAttribute('font-family', css('--font-mono'));
+        num.setAttribute('font-size', '10');
+        num.setAttribute('font-weight', '600');
+        a.appendChild(num);
+      } else {
+        // Label to the right unless that would run off the chart (~6.6px per mono character).
+        const labelW = p.label.length * 6.6 + 11;
+        const right = cx + labelW <= W || cx - labelW < 0;
+        const lbl = text(right ? cx + 11 : cx - 11, cy + 4, p.label, right ? 'start' : 'end', css('--ink'));
+        lbl.setAttribute('font-family', css('--font-mono'));
+        lbl.setAttribute('font-size', '11');
+        a.appendChild(lbl);
+      }
+      const show = () => (tip.textContent = `${p.label}: ${p.group === 'work' ? 'see Expeditions' : 'open'}`);
+      a.addEventListener('mouseenter', show);
+      a.addEventListener('focus', show);
+      if (animate && !reduced) {
+        a.style.opacity = '0';
+        a.style.transition = `opacity .4s ease ${i * 60}ms`;
+        requestAnimationFrame(() => (a.style.opacity = '1'));
+      }
+      svg.appendChild(a);
+    });
+  }
+
+  let drawn = false;
+  const io = new IntersectionObserver((entries) => {
+    if (entries.some((e) => e.isIntersecting) && !drawn) {
+      drawn = true;
+      draw(true);
+    }
+  });
+  io.observe(svg);
+  window.addEventListener('themechange', () => drawn && draw());
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => drawn && draw());
+  let rt: number | undefined;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = window.setTimeout(() => drawn && draw(), 200);
+  });
+</script>

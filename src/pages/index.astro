@@ -1,0 +1,321 @@
+---
+import Base from '../layouts/Base.astro';
+import TitlePage from '../components/TitlePage.astro';
+import NotebookTabs from '../components/NotebookTabs.astro';
+import Measurements from '../components/Measurements.astro';
+import Expeditions from '../components/Expeditions.astro';
+import Cabinet from '../components/Cabinet.astro';
+import CalibrationGame from '../components/CalibrationGame.astro';
+import Sprig from '../components/Sprig.astro';
+import { person, greenhouse, fieldNotes } from '../data/site';
+---
+
+<Base>
+  <NotebookTabs />
+  <TitlePage />
+
+  <main class="page">
+    <Measurements />
+    <Expeditions />
+    <Cabinet />
+    <CalibrationGame />
+
+    <section id="greenhouse" class="chapter">
+      <div class="chapter-head">
+        <span class="chapter-num">Chapter V</span>
+        <h2>The greenhouse</h2>
+        <span class="chapter-note">still growing, come back soon</span>
+      </div>
+      <ul class="sprouts">
+        {
+          greenhouse.map((s) => (
+            <li class="sprout card">
+              <Sprig kind="flower" size={34} class="sprout-icon" />
+              <div>
+                <h3>
+                  <a href={s.repo} target="_blank" rel="noopener">
+                    {s.title} ↗
+                  </a>
+                </h3>
+                <p>{s.summary}</p>
+                <p class="growth hand">{s.note}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+
+    <section id="notes" class="chapter">
+      <div class="chapter-head">
+        <span class="chapter-num">Chapter VI</span>
+        <h2>Field notes</h2>
+        <span class="chapter-note">things I've written down</span>
+      </div>
+      <ul class="notes">
+        {
+          fieldNotes.map((n) => (
+            <li>
+              <a class="note" href={n.href} target="_blank" rel="noopener">
+                <span class="note-meta mono">
+                  {n.date} · {n.where}
+                </span>
+                <span class="note-title">{n.title}</span>
+                <span class="note-blurb">{n.blurb}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="more-notes">
+        More on <a href={person.medium} target="_blank" rel="noopener">Medium</a> and
+        <a href={person.linkedinActivity} target="_blank" rel="noopener">LinkedIn</a>.
+      </p>
+    </section>
+
+    <section id="off-duty" class="chapter">
+      <div class="chapter-head">
+        <span class="chapter-num">Chapter VII</span>
+        <h2>Off-duty observations</h2>
+        <span class="chapter-note">the margins of the notebook</span>
+      </div>
+      <div class="offduty">
+        <div class="doodle card">
+          <svg viewBox="0 0 160 100" aria-hidden="true" class="doodle-art">
+            <path
+              d="M20 70 C10 50 25 25 50 28 C70 30 70 12 95 14 C125 16 150 30 140 55 C132 75 110 66 96 76 C80 88 40 92 20 70Z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="3"
+              stroke-linejoin="round"></path>
+            <path d="M28 66 l10 -6" stroke="var(--rose)" stroke-width="4" stroke-linecap="round"></path>
+            <g fill="var(--ink)">
+              <rect x="118" y="20" width="5" height="5"></rect><rect x="128" y="20" width="5" height="5"></rect>
+              <rect x="123" y="25" width="5" height="5"></rect><rect x="133" y="25" width="5" height="5"></rect>
+            </g>
+          </svg>
+          <h3>Formula 1</h3>
+          <p>
+            Race weekends are blocked off. Pit-wall strategy is basically live evaluation under uncertainty, and I find
+            it hard to look away.
+          </p>
+        </div>
+        <div class="doodle card">
+          <svg viewBox="0 0 160 100" aria-hidden="true" class="doodle-art">
+            <g fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 30 h70 v12 a6 6 0 0 0 0 12 v12 h-70 v-12 a6 6 0 0 0 0 -12z" transform="rotate(-8 50 50)"
+              ></path>
+              <path d="M70 34 h70 v12 a6 6 0 0 0 0 12 v12 h-70 v-12 a6 6 0 0 0 0 -12z" transform="rotate(6 105 52)"
+              ></path>
+            </g>
+            <text x="44" y="54" font-family="var(--font-hand)" font-size="16" fill="var(--rose)" transform="rotate(-8 50 50)"
+              >ADMIT</text>
+            <text x="92" y="58" font-family="var(--font-hand)" font-size="16" fill="var(--sage)" transform="rotate(6 105 52)"
+              >ONE</text>
+          </svg>
+          <h3>Movies</h3>
+          <p>
+            Probably why the first domain in my LLM-as-a-Judge benchmark is movie recommendations. I also moderated a
+            Cornell screening of the Oscar-nominated documentary <em>To Kill a Tiger</em>.
+          </p>
+        </div>
+        <div class="doodle card">
+          <svg viewBox="0 0 160 100" aria-hidden="true" class="doodle-art">
+            <circle cx="80" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="2.5"></circle>
+            <path d="M80 20 C66 36 66 64 80 80 M80 20 C94 36 94 64 80 80 M50 50 H110" fill="none" stroke="currentColor"
+              stroke-width="2"></path>
+            <path d="M120 30 l10 -10 M126 40 l14 -6 M120 70 l12 8" stroke="var(--rose)" stroke-width="2.5"
+              stroke-linecap="round"></path>
+          </svg>
+          <h3>Sports</h3>
+          <p>Happiest with a match on. A good scoreboard is just a well-designed eval dashboard.</p>
+        </div>
+        <div class="doodle card">
+          <svg viewBox="0 0 160 100" aria-hidden="true" class="doodle-art">
+            <g fill="none" stroke="var(--blue)" stroke-width="2.5" stroke-linecap="round">
+              <path d="M80 50 m-28 0 a28 28 0 1 0 56 0 a28 28 0 1 0 -56 0"></path>
+              <path d="M80 50 m-16 0 a16 16 0 1 1 32 0 a16 16 0 1 1 -24 10"></path>
+              <path d="M80 50 m-6 0 a6 6 0 1 0 12 0"></path>
+            </g>
+          </svg>
+          <h3>
+            <a href="/specimens/rasengan/">Inner-child projects</a>
+          </h3>
+          <p>Like teaching my webcam to put a spinning Naruto Rasengan in my palm.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="chapter contact">
+      <Sprig kind="divider" />
+      <h2>Send word</h2>
+      <p class="contact-lede">
+        I'm looking for AI Engineer roles where reliability matters: agentic systems, LLM evaluation, and the
+        infrastructure that makes models trustworthy in production. If that sounds like your team, I'd love to hear
+        from you.
+      </p>
+      <div class="contact-actions">
+        <a class="btn btn-primary" href={`mailto:${person.email}`}>Email me</a>
+        <a class="btn" href={person.resume} target="_blank" rel="noopener">Resume (PDF)</a>
+        <a class="btn" href={person.linkedin} target="_blank" rel="noopener">LinkedIn</a>
+        <a class="btn" href={person.github} target="_blank" rel="noopener">GitHub</a>
+        <a class="btn" href={person.medium} target="_blank" rel="noopener">Medium</a>
+      </div>
+      <p class="sign hand">Hemanjali, {person.location}</p>
+    </section>
+  </main>
+
+  <footer class="page foot mono">
+    <p>Field Journal of {person.name} · hand-built with Astro &amp; rough.js · © {new Date().getFullYear()}</p>
+  </footer>
+</Base>
+
+<style>
+  .sprouts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+  .sprout {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 14px;
+    padding: 22px;
+    border-style: dashed;
+  }
+  .sprout h3 {
+    font-size: 1.3rem;
+  }
+  .sprout h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .sprout h3 a:hover {
+    text-decoration: underline;
+  }
+  .sprout p {
+    color: var(--ink-soft);
+  }
+  .growth {
+    font-size: 1.25rem;
+    color: var(--sage) !important;
+    margin: 0;
+  }
+
+  .notes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border-top: 1px solid var(--rule);
+  }
+  .note {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 2px 24px;
+    padding: 18px 4px;
+    border-bottom: 1px solid var(--rule);
+    text-decoration: none;
+    color: var(--ink);
+    transition: background 0.15s ease, padding 0.15s ease;
+  }
+  .note:hover {
+    background: var(--card);
+    padding-left: 12px;
+  }
+  .note-meta {
+    grid-row: span 2;
+    font-size: 0.76rem;
+    color: var(--ink-faint);
+    padding-top: 4px;
+  }
+  .note-title {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+  }
+  .note-blurb {
+    color: var(--ink-soft);
+    font-size: 0.95rem;
+  }
+  .more-notes {
+    margin-top: 18px;
+    color: var(--ink-soft);
+  }
+
+  .offduty {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 20px;
+  }
+  .doodle {
+    padding: 20px 22px;
+  }
+  .doodle:nth-child(odd) {
+    transform: rotate(-0.8deg);
+  }
+  .doodle:nth-child(even) {
+    transform: rotate(0.8deg);
+  }
+  .doodle-art {
+    width: 120px;
+    height: 76px;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .doodle h3 {
+    font-size: 1.25rem;
+  }
+  .doodle h3 a {
+    color: var(--ink);
+  }
+  .doodle p {
+    color: var(--ink-soft);
+    font-size: 0.97rem;
+    margin: 0;
+  }
+
+  .contact {
+    text-align: center;
+    color: var(--sage);
+  }
+  .contact h2 {
+    font-size: clamp(2.4rem, 6vw, 3.8rem);
+    color: var(--ink);
+    margin-top: 18px;
+  }
+  .contact-lede {
+    max-width: 60ch;
+    margin: 0 auto 18px;
+    color: var(--ink-soft);
+    font-size: 1.1rem;
+  }
+  .contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .sign {
+    font-size: 1.7rem;
+    color: var(--rose);
+    margin-top: 28px;
+  }
+  .foot {
+    font-size: 0.75rem;
+    color: var(--ink-faint);
+    text-align: center;
+    padding-top: 24px;
+    padding-bottom: 96px;
+    border-top: 1px solid var(--rule);
+  }
+  @media (max-width: 600px) {
+    .note {
+      grid-template-columns: 1fr;
+    }
+    .note-meta {
+      grid-row: auto;
+    }
+  }
+</style>

@@ -1,0 +1,235 @@
+---
+import Base from '../../layouts/Base.astro';
+import Sprig from '../../components/Sprig.astro';
+import { specimens, person, type Specimen } from '../../data/site';
+
+export function getStaticPaths() {
+  return specimens.filter((s) => s.hasPage).map((s) => ({ params: { slug: s.slug }, props: { s } }));
+}
+
+const { s } = Astro.props as { s: Specimen };
+const withPages = specimens.filter((x) => x.hasPage);
+const idx = withPages.findIndex((x) => x.slug === s.slug);
+const next = withPages[(idx + 1) % withPages.length];
+const plateNo = specimens.findIndex((x) => x.slug === s.slug) + 1;
+---
+
+<Base title={`${s.title} | ${person.name}`} description={s.summary}>
+  <main class="page plate-page">
+    <a class="back mono" href="/#specimens">← back to the cabinet</a>
+
+    <header class="plate-head">
+      <p class="plate-no mono">Plate {String(plateNo).padStart(2, '0')} · {s.kind} · {s.year}</p>
+      <h1>{s.title}</h1>
+      <p class="latin">{s.latin}</p>
+      {s.status && <span class="status hand">{s.status}</span>}
+      <p class="summary">{s.summary}</p>
+      <div class="links">
+        {
+          s.repo && (
+            <a class="btn btn-primary" href={s.repo} target="_blank" rel="noopener">
+              View on GitHub ↗
+            </a>
+          )
+        }
+        {
+          s.extraLink && (
+            <a class="btn" href={s.extraLink.href} target="_blank" rel="noopener">
+              {s.extraLink.label} ↗
+            </a>
+          )
+        }
+      </div>
+    </header>
+
+    <div class="sheet">
+      <aside class="label-card card">
+        <span class="tape" aria-hidden="true"></span>
+        <dl>
+          <dt class="mono">Habitat</dt>
+          <dd>{s.habitat}</dd>
+          <dt class="mono">Collected with</dt>
+          <dd class="stack">{s.stack.map((t) => <span class="tag">{t}</span>)}</dd>
+        </dl>
+        <Sprig kind="fern" size={44} class="label-sprig" />
+      </aside>
+
+      <article class="notes-col">
+        {
+          s.problem && (
+            <section>
+              <h2>Why it matters</h2>
+              <p>{s.problem}</p>
+            </section>
+          )
+        }
+        {
+          s.approach && (
+            <section>
+              <h2>How it works</h2>
+              <ul>
+                {s.approach.map((a) => (
+                  <li>{a}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+        {
+          s.findings && (
+            <section class="findings">
+              <h2>Observations</h2>
+              <ul>
+                {s.findings.map((f) => (
+                  <li>{f}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+      </article>
+    </div>
+
+    <nav class="next">
+      <Sprig kind="divider" />
+      <a href={`/specimens/${next.slug}/`}>
+        <span class="mono">next plate</span>
+        <span class="next-title">{next.title} →</span>
+      </a>
+    </nav>
+  </main>
+</Base>
+
+<style>
+  .plate-page {
+    padding-top: 40px;
+    padding-bottom: 60px;
+    max-width: 980px;
+  }
+  .back {
+    font-size: 0.85rem;
+    text-decoration: none;
+  }
+  .plate-head {
+    position: relative;
+    margin: 36px 0 40px;
+  }
+  .plate-no {
+    font-size: 0.76rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  h1 {
+    font-size: clamp(2.4rem, 7vw, 4.4rem);
+    margin: 0;
+    font-variation-settings: 'SOFT' 100, 'WONK' 1;
+  }
+  .latin {
+    font-style: italic;
+    color: var(--sage);
+    font-size: 1.25rem;
+    margin: 4px 0 16px;
+  }
+  .status {
+    display: inline-block;
+    font-size: 1.4rem;
+    color: var(--rose);
+    transform: rotate(-2deg);
+    margin-bottom: 10px;
+  }
+  .summary {
+    font-family: var(--font-display);
+    font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+    line-height: 1.4;
+    max-width: 40ch;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .sheet {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  .label-card {
+    position: sticky;
+    top: 70px;
+    padding: 26px 20px 20px;
+  }
+  dl {
+    margin: 0;
+  }
+  dt {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 6px;
+  }
+  dd {
+    margin: 0 0 18px;
+    color: var(--ink-soft);
+  }
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .notes-col h2 {
+    font-size: 1.6rem;
+    margin-top: 6px;
+  }
+  .notes-col section {
+    margin-bottom: 34px;
+  }
+  .notes-col ul {
+    padding-left: 22px;
+  }
+  .notes-col li {
+    margin-bottom: 10px;
+  }
+  .notes-col li::marker {
+    content: '❧  ';
+    color: var(--sage);
+  }
+  .findings {
+    background: var(--sage-soft);
+    border-radius: 6px;
+    padding: 20px 24px 8px;
+  }
+  .next {
+    margin-top: 40px;
+    text-align: center;
+    color: var(--sage);
+  }
+  .next a {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    text-decoration: none;
+    margin-top: 16px;
+  }
+  .next .mono {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+  }
+  .next-title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+  }
+  @media (max-width: 760px) {
+    .sheet {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .label-card {
+      position: static;
+    }
+  }
+</style>

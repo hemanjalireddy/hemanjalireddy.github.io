@@ -1,0 +1,197 @@
+---
+import SpecimenMap from './SpecimenMap.astro';
+import { specimens, algorithms } from '../data/site';
+---
+
+<section id="specimens" class="chapter">
+  <div class="chapter-head">
+    <span class="chapter-num">Chapter III</span>
+    <h2>Specimen cabinet</h2>
+    <span class="chapter-note">things I've built, pinned &amp; labelled</span>
+  </div>
+  <p class="lede">
+    Every project here is catalogued like a specimen: what it is, where it was found, and what I observed. Open a
+    plate for the full write-up.
+  </p>
+
+  <ul class="cabinet">
+    {
+      specimens.map((s, i) => {
+        const href = s.hasPage ? `/specimens/${s.slug}/` : s.repo;
+        const external = !s.hasPage;
+        return (
+          <li class="plate card">
+            <span class="tape" aria-hidden="true" />
+            <p class="plate-no mono">
+              Plate {String(i + 1).padStart(2, '0')} · {s.year}
+            </p>
+            <h3>
+              <a href={href} target={external ? '_blank' : undefined} rel={external ? 'noopener' : undefined}>
+                {s.title}
+              </a>
+            </h3>
+            <p class="latin">{s.latin}</p>
+            <p class="kind mono">{s.kind}</p>
+            <p class="summary">{s.summary}</p>
+            <div class="stack">
+              {s.stack.slice(0, 5).map((t) => (
+                <span class="tag">{t}</span>
+              ))}
+            </div>
+            <p class="more mono" aria-hidden="true">
+              {s.hasPage ? 'read the plate →' : 'view on GitHub ↗'}
+            </p>
+            {s.status && <span class="status hand">{s.status}</span>}
+          </li>
+        );
+      })
+    }
+  </ul>
+
+  <div class="herbarium card">
+    <div class="herb-head">
+      <h3>The early herbarium</h3>
+      <span class="hand herb-note">classic ML, pressed in 2022</span>
+    </div>
+    <p class="herb-lede">
+      Where I learned the fundamentals: one repository per algorithm, each built and studied on its own.
+    </p>
+    <p class="mono algo-label">Algorithms, one specimen each</p>
+    <div class="algos">
+      {
+        algorithms.map((a) => (
+          <a class="tag" href={a.repo} target="_blank" rel="noopener">
+            {a.name}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+
+  <SpecimenMap />
+</section>
+
+<style>
+  .cabinet {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px 24px;
+  }
+  .plate {
+    position: relative;
+    padding: 28px 24px 22px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .plate:hover {
+    transform: translateY(-3px);
+  }
+  .plate:focus-within {
+    outline: 2px dashed var(--rose);
+    outline-offset: 4px;
+  }
+  .plate-no {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 8px;
+  }
+  h3 {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  /* Whole card is clickable via the title link. */
+  h3 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  h3 a:focus-visible {
+    outline: none;
+  }
+  .latin {
+    font-style: italic;
+    color: var(--sage);
+    margin: 2px 0 6px;
+  }
+  .kind {
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  .summary {
+    color: var(--ink-soft);
+    flex: 1;
+  }
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .more {
+    font-size: 0.8rem;
+    color: var(--blue);
+    margin: 0;
+  }
+  .status {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    font-size: 1.2rem;
+    color: var(--rose);
+    transform: rotate(4deg);
+  }
+  .herbarium {
+    margin-top: 40px;
+    padding: 26px;
+    border-style: dashed;
+  }
+  .herb-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+  }
+  .herb-head h3 {
+    font-size: 1.5rem;
+    margin: 0;
+  }
+  .herb-note {
+    font-size: 1.3rem;
+    color: var(--rose);
+  }
+  .herb-lede {
+    color: var(--ink-soft);
+    max-width: 64ch;
+    margin: 8px 0 18px;
+  }
+  .algo-label {
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 10px;
+  }
+  .algos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .algos a {
+    text-decoration: none;
+  }
+  .algos a:hover {
+    border-color: var(--sage);
+    color: var(--ink);
+  }
+</style>

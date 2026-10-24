@@ -1,0 +1,124 @@
+---
+const tabs = [
+  { id: 'measurements', label: 'Measurements' },
+  { id: 'expeditions', label: 'Expeditions' },
+  { id: 'specimens', label: 'Specimens' },
+  { id: 'calibration', label: 'Try it' },
+  { id: 'greenhouse', label: 'Greenhouse' },
+  { id: 'notes', label: 'Field notes' },
+  { id: 'off-duty', label: 'Off duty' },
+  { id: 'contact', label: 'Send word' },
+];
+---
+
+<nav class="tabs" aria-label="Journal chapters">
+  <ul>
+    {
+      tabs.map((t, i) => (
+        <li>
+          <a href={`#${t.id}`} data-tab={t.id} style={`--i:${i}`}>
+            {t.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .tabs {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 40;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  a {
+    display: block;
+    writing-mode: vertical-rl;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--ink-soft);
+    padding: 12px 6px 12px 8px;
+    border: 1px solid var(--rule);
+    border-right: none;
+    border-radius: 6px 0 0 6px;
+    background: color-mix(in srgb, var(--card) 85%, var(--sage-soft) calc(var(--i) * 6%));
+    transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
+  }
+  a:hover {
+    transform: translateX(-4px);
+    color: var(--ink);
+  }
+  a.active {
+    background: var(--sage);
+    color: var(--paper);
+    border-color: var(--sage);
+    transform: translateX(-6px);
+  }
+
+  @media (max-width: 1240px) {
+    .tabs {
+      top: auto;
+      transform: none;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: color-mix(in srgb, var(--paper) 92%, transparent);
+      backdrop-filter: blur(6px);
+      border-top: 1px solid var(--rule);
+    }
+    ul {
+      flex-direction: row;
+      overflow-x: auto;
+      padding: 8px 12px;
+      scrollbar-width: none;
+    }
+    a {
+      writing-mode: horizontal-tb;
+      white-space: nowrap;
+      border: 1px solid var(--rule);
+      border-radius: 999px;
+      padding: 6px 12px;
+    }
+    a:hover,
+    a.active {
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.tabs a')];
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        links.forEach((l) => l.classList.toggle('active', l.dataset.tab === e.target.id));
+        // Keep the active pill visible in the horizontal mobile bar without touching page scroll.
+        const active = links.find((l) => l.dataset.tab === e.target.id);
+        const bar = active?.closest('ul');
+        if (active && bar && bar.scrollWidth > bar.clientWidth) {
+          const li = active.parentElement!;
+          bar.scrollLeft = li.offsetLeft - bar.clientWidth / 2 + li.clientWidth / 2;
+        }
+      }
+    },
+    { rootMargin: '-45% 0px -50% 0px' },
+  );
+  links.forEach((l) => {
+    const target = document.getElementById(l.dataset.tab!);
+    if (target) observer.observe(target);
+  });
+</script>
