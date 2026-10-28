@@ -84,7 +84,7 @@ export const expeditions: Expedition[] = [
     story:
       'Two research questions about whether models can be trusted with nuanced, human judgments, plus a semester teaching statistics.',
     points: [
-      'Comparative Constitutional Analysis with LLMs: benchmarked LLMs against human experts across 460 variables and 581 constitutions, reaching 71% agreement; built pipelines for legal-document ingestion and inter-rater reliability.',
+      'Comparative Constitutional Analysis with LLMs: benchmarked LLMs against human experts across 460 variables and 581 constitutions, reaching 71% agreement.',
       'Multimodal AI for Harmful Speech Detection: benchmarked vision-language models on real-world, code-mixed multimedia across culturally nuanced, implicit harm categories.',
       'Teaching Assistant, STSCI 2100: led weekly labs in R, statistics and data analysis.',
     ],
